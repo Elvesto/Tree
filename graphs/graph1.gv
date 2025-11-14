@@ -1,0 +1,15 @@
+digraph gh {
+graph [rankdir=TB];
+	node1 [label="Sosal\n left = 0x503000000070\n right = (nil)"];
+	node1 -> node2 [color=red];
+	node2 [label="GAY\n left = 0x5030000000a0\n right = 0x5030000000d0"];
+	node2 -> node3 [color=red];
+	node3 [label="ANTON\n left = (nil)\n right = (nil)"];
+	node2 -> node4 [color=red];
+	node4 [label="ovosh\n left = 0x503000000100\n right = 0x503000000130"];
+	node4 -> node5 [color=red];
+	node5 [label="pomidor\n left = (nil)\n right = (nil)"];
+	node4 -> node6 [color=red];
+	node6 [label="Marina\n left = (nil)\n right = (nil)"];
+
+}

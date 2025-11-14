@@ -1,0 +1,13 @@
+digraph gh {
+graph [rankdir=TB];
+	node10 [label="Element 10\n data = 50\n left = 0x503000000070\n right = 0x503000000100"];
+	node10 -> node11 [color=red];
+	node11 [label="Element 11\n data = 40\n left = 0x5030000000d0\n right = 0x5030000000a0"];
+	node11 -> node12 [color=red];
+	node12 [label="Element 12\n data = 35\n left = (nil)\n right = (nil)"];
+	node11 -> node13 [color=red];
+	node13 [label="Element 13\n data = 45\n left = (nil)\n right = (nil)"];
+	node10 -> node14 [color=red];
+	node14 [label="Element 14\n data = 55\n left = (nil)\n right = (nil)"];
+
+}
