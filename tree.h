@@ -20,7 +20,7 @@ const int START_SIZE_ARRAY = 32;
 enum TreeError {
     OK,
     ALLOCATION_ERROR,
-
+    NOT_OK
 };
 
 struct Node {
@@ -29,31 +29,28 @@ struct Node {
     Node* right;
 };
 // FIXME Field with FILE* dump_file
-typedef Node Tree;
+// typedef Node Tree;
+struct Tree {
+    Node* root;
+    FileParam dumpFile;
+};
 
-TreeError OpenDumpFile();
+TreeError TreeInit(Tree* tree, DataType value, const char* dumpFileName);
 
-TreeError TreeInit(Tree** tree, DataType value);
-
-TreeError TreeDestroy(Tree** tree);
-
-TreeError TreeDump(Tree* tree);
+TreeError TreeDestroy(Tree* tree);
 
 TreeError UploadTree(Tree* tree, FILE* stream);
 
-TreeError NodeInsert(Node* root, DataType value);
+//TreeError NodeInsert(Node* root, DataType value);
 
-TreeError NodeDestroy(Node* node);
+TreeError NodesDestroy(Node* node);
 
 Node* NewNode(DataType value);
 
-TreeError CloseDumpFile();
+TreeError Akinator(Node* tree);
 
-TreeError Akinator(Tree* tree);
+TreeError LoadTree(Tree* tree, FileParam* fileInfo, const char* dumpFileName);
 
-TreeError LoadTree(Tree** tree, FileParam* fileInfo);
-
-int CreateFileParam(const int argc, const char* const argv[], 
-    FileParam* fileLoadTree, FileParam* fileUploadTree);
+int Game(Tree* tree);
 
 #endif // THREE_H_

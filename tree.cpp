@@ -8,29 +8,113 @@
 #include "graph.h"
 #include "tools.h"
 
-static const char* const dumpFileName = "dumpFile.html";
+// static const char* const dumpFileName = "dumpFile.html";
 
-static FILE* dumpFile = NULL;
+// static FILE* dumpFile = NULL;
 
-static const char* yesVariants[] = {
+static const char* YES_VARIANTS[] = {
     "YES",
+    "Yes",
     "yes",
     "Y",
     "y",
     "DA",
+    "Da",
     "da",
 };
 
-static const char* noVariants[] = {
+static const char* NO_VARIANTS[] = {
     "NO",
+    "No",
     "no",
     "N",
     "n",
     "NET",
+    "Net",
     "net",
 };
 
-static TreeError PrintNode(Node* node, FILE* stream) {
+static const char* HELLO_WINDOW = \
+"###############################\n"
+"#          CHOOSE MODS         #\n"
+"#                             #\n"
+"# [1] - Akinator              #\n"
+"# [2] - Opredelenie           #\n"
+"# [3] - save tree             #\n"
+"# [4] - exit                  #\n"
+"# [5] - cmp (in develop       #\n"
+"# [6] i'm gay                 #\n"
+"###############################\n";
+
+static TreeError PrintNode(Node* node, FILE* stream);
+static int checkInArray(const char* value, const char* arr[], int size);
+static FileParam OpenDumpFile(const char* dumpFileName);
+static TreeError CloseDumpFile(FileParam dump);
+static TreeError AddAkinatorBase(Node* node);
+
+TreeError TreeInit(Tree* tree, DataType value, const char* dumpFileName) {
+    assert(tree);
+
+    tree->root = (Node*)calloc(COUNT_START_ELEMENT, sizeof(Node));
+    if (tree->root == NULL) {
+        fprintf(stderr, "ALLOCATION ERROR\n");
+        return ALLOCATION_ERROR;
+    }
+
+    tree->dumpFile = OpenDumpFile(dumpFileName);
+
+    tree->root->data = value;
+    tree->root->left = NULL;
+    tree->root->right = NULL; 
+
+    return OK;
+}
+
+FileParam OpenDumpFile(const char* dumpFileName) {
+    assert(dumpFileName);
+    
+    FileParam dump = {.fileName = dumpFileName};
+    dump.file = fopen(dumpFileName, "w");
+    if (dump.file == NULL) {
+        fprintf(stderr, "FILE NO OPEN\n");
+        dump.fileName = NULL;
+        return dump;
+    }
+
+    return dump;
+}
+
+TreeError TreeDestroy(Tree* tree) {
+    assert(tree);
+
+    DEBUG_LOG ("%s", "Tree destroy");
+
+    NodesDestroy(tree->root);
+
+    CloseDumpFile(tree->dumpFile);
+
+    return OK;
+}
+
+static TreeError CloseDumpFile(FileParam dump) {
+    if (dump.file != NULL) {
+        fclose(dump.file);
+        dump.fileName = NULL;
+    }
+
+    return OK;
+}
+
+TreeError UploadTree(Tree* tree, FILE* stream) {
+    assert(tree);
+    assert(stream);
+
+    PrintNode(tree->root, stream);
+
+    return OK;
+}
+
+TreeError PrintNode(Node* node, FILE* stream) {
     assert(node);
     fprintf(stream, "(");
     fprintf(stream, "\"%s\"", node->data);
@@ -45,76 +129,6 @@ static TreeError PrintNode(Node* node, FILE* stream) {
         fprintf(stream, "nil ");
     }
     fprintf(stream, ")");
-
-    return OK;
-}
-
-TreeError OpenDumpFile() {
-    dumpFile = fopen(dumpFileName, "w");
-    if (dumpFile == NULL) {
-        fprintf(stderr, "FILE NO OPEN\n");
-        return OK;
-    }
-
-    return OK;
-}
-
-TreeError TreeInit(Tree** tree, DataType value) {
-    assert(tree);
-
-    *tree = (Tree*)calloc(COUNT_START_ELEMENT, sizeof(Tree));
-    if (*tree == NULL) {
-        fprintf(stderr, "ALLOCATION ERROR\n");
-        return ALLOCATION_ERROR;
-    }
-
-    (*tree)->data = value;
-    (*tree)->left = NULL;
-    (*tree)->right = NULL; 
-
-    return OK;
-}
-
-TreeError TreeDestroy(Tree** tree) {
-    assert(tree);
-
-    NodeDestroy(*tree);
-
-    return OK;
-}
-
-TreeError TreeDump(Tree* tree) {
-    if (tree == NULL) {
-        fprintf(stderr, "NULLPTR was passed to the TreeDump\n");
-        return OK;
-    }
-
-    static int counter = 1;
-
-    fprintf(dumpFile, "<pre>\n");
-
-    fprintf(dumpFile, "<h3> THREE LIST №%d </h3>\n", counter);
-
-    fprintf(dumpFile, "THREE [%p]\n", tree);
-
-    const int GRAPH_FILE_NAME_LEN = 32;
-    char graphFileName[GRAPH_FILE_NAME_LEN] = {};
-
-    sprintf(graphFileName, "graphs/graph%d.gv", counter);
-
-    GraphCreate(tree, graphFileName);
-
-    fprintf(dumpFile, "<img src=images/graph%d.png>\n", counter);
-    counter++;
-
-    return OK;
-}
-
-TreeError UploadTree(Tree* tree, FILE* stream) {
-    assert(tree);
-    assert(stream);
-
-    PrintNode(tree, stream);
 
     return OK;
 }
@@ -142,20 +156,28 @@ TreeError NodeInsert(Node* root, DataType value) {
 }
 */
 
-TreeError NodeDestroy(Node* node) {
+TreeError NodesDestroy(Node* node) {
     assert(node);
+    static int countDestroy = 0;
 
+    // DEBUG_LOG("node = %p", node);
     if (node->left) {
-        NodeDestroy(node->left);
+        // DEBUG_LOG("\t\tnode->left = %p", node->left);
+        NodesDestroy(node->left);
         node->left = NULL;
     }
     if (node->right) {
-        NodeDestroy(node->right);
+        // DEBUG_LOG("\t\t node->right = %p", node->right);
+        NodesDestroy(node->right);
         node->right = NULL;
     }
 
     FREE(node->data);
     FREE(node);
+    node = NULL;
+
+    countDestroy++;
+    // printf("%d\n", countDestroy);
 
     return OK;
 }
@@ -164,7 +186,7 @@ TreeError NodeDestroy(Node* node) {
 Node* NewNode(DataType value) {
     Node* node = (Node*)calloc(COUNT_START_ELEMENT, sizeof(Node)); // FIXME - NULL ( -1 ball k ocenke)
     if (node == NULL) {
-        fprintf(stderr, "ALlOCATION NODE DID'T HAPPEN\n");
+        fprintf(stderr, "AllOCATION NODE DID'T HAPPEN\n");
         return NULL;
     }
     node->data = value;
@@ -174,24 +196,7 @@ Node* NewNode(DataType value) {
     return node;
 }
 
-TreeError CloseDumpFile() {
-    if (dumpFile != NULL) {
-        fclose(dumpFile);
-    }
-
-    return OK;
-}
-
-static int checkInside(char* value, const char* arr[], int size) {
-    for (int i = 0; i < size; i++) {
-        if (strcmp(value, arr[i]) == 0) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-TreeError Akinator(Tree* tree) {
+TreeError Akinator(Node* tree) {
     assert(tree);
 
     char buf[START_SIZE_ARRAY] = {};
@@ -200,47 +205,81 @@ TreeError Akinator(Tree* tree) {
 
     scanf("%31s", buf);
 
-    while (!checkInside(buf, yesVariants, sizeof(yesVariants) / sizeof(yesVariants[0])) && !checkInside(buf, noVariants, sizeof(noVariants) / sizeof(noVariants[0]))) {
+    while (!checkInArray(buf, YES_VARIANTS, sizeof(YES_VARIANTS) / sizeof(YES_VARIANTS[0])) && \
+    !checkInArray(buf, NO_VARIANTS, sizeof(NO_VARIANTS) / sizeof(NO_VARIANTS[0]))) {
 
-        printf("INCORRECT INPUT\n");
+        printf("Неверный ввод\n");
         scanf("%31s", buf);
 
     }
-    if (checkInside(buf, yesVariants, sizeof(yesVariants) / sizeof(yesVariants[0]))) {
+    if (checkInArray(buf, YES_VARIANTS, sizeof(YES_VARIANTS) / sizeof(YES_VARIANTS[0]))) {
         if (tree->left) {
             Akinator(tree->left);
         } else {
-            printf("URAAA NASHLI\n");
+            printf("Урааа нашли\n");
             return OK;
         }
-    } else if (checkInside(buf, noVariants, sizeof(noVariants) / sizeof(noVariants[0]))) {
+    } else if (checkInArray(buf, NO_VARIANTS, sizeof(NO_VARIANTS) / sizeof(NO_VARIANTS[0]))) {
         if (tree->right) {
             Akinator(tree->right);
         } else {
-            printf("KTO ETO BIL?\n");
-            scanf("%31s", buf);
-            // fprintf(stderr, "\033[0;31m" "%s" "\033[0m\n", buf);
-            Node* temp = NewNode(strdup(buf)); // FIXME - NULL
-            printf("CHEM ON OTLICHAETCA OT POSLEDNEGO?\n");
-            scanf("%*c%[^\n]%*c", buf);
-            // fprintf(stderr, "\033[0;31m" "%s" "\033[0m\n", buf);
-            DataType tempStr = tree->data;
-            tree->data = strdup(buf); // FIXME - NULL
-            tree->left = temp;
-            tree->right = NewNode(tempStr);
+            AddAkinatorBase(tree);
         }
     }
 
     return OK;
-    
 }
 
 
+static TreeError AddAkinatorBase(Node* node) {
+    assert(node);
+    
+    printf("Я сдаюсь:((\n"
+        "Кто или что это было?\n");
+
+    char* stringForDup = {};
+    char buf[32] = {};
+    scanf(" %31[^\n]%*c", buf);
+
+    stringForDup = strdup(buf);
+    if (stringForDup == NULL) {
+        fprintf(stderr, "String didn't duplicate\n");
+        return NOT_OK;
+    }
+    Node* temp = NewNode(stringForDup); // FIXME - NULL
+    if (temp == NULL) {
+        return NOT_OK;
+    }
+
+    printf("Чем он отличается от %s?\n", node->data);
+    scanf(" %31[^\n]%*c", buf);
+
+    char* tempStr = node->data;
+    node->data = strdup(buf); // FIXME - NULL
+    if (node->data == NULL) {
+        fprintf(stderr, "String didn't duplicate\n");
+        return NOT_OK;
+    }
+
+    node->left = temp;
+    node->right = NewNode(tempStr);
+
+    return OK;
+}
+
+int checkInArray(const char* value, const char* arr[], int size) {
+    for (int i = 0; i < size; i++) {
+        if (strcmp(value, arr[i]) == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 static Node* ReadNode(char** ppos) {
     assert(ppos);
+
     char* pos = *ppos;
-    
 
     if (pos[0] == '(') {
 
@@ -266,7 +305,7 @@ static Node* ReadNode(char** ppos) {
         pos++;
         *ppos = pos;
         return node;
-    } else if (strncmp(pos, "nil ", 3) == 0) {
+    } else if (strncmp(pos, "nil ", 4) == 0) {
 
         pos += 4;
         *ppos = pos;
@@ -279,45 +318,68 @@ static Node* ReadNode(char** ppos) {
 
 
 
-TreeError LoadTree(Tree** tree, FileParam* fileInfo) {
-    assert(tree);
+TreeError LoadTree(Tree* tree, FileParam* fileInfo, const char* dumpFileName) {
     assert(fileInfo);
 
+    tree->dumpFile = OpenDumpFile(dumpFileName);
+
     char* buffer = bufCreate(fileInfo);
+    printf("%s\n", buffer);
     char* temp = buffer;
 
-    *tree = ReadNode(&temp);
+    tree->root = ReadNode(&temp);
 
     FREE(buffer);
 
     return OK;
 }
 
-int CreateFileParam(const int argc, const char* const argv[], 
-    FileParam* fileLoadTree, FileParam* fileUploadTree) {
+int Game(Tree* tree) {
+    assert(tree);
 
-    assert(argv);
-    assert(fileLoadTree);
-    assert(fileUploadTree);
+    printf("%s\n", HELLO_WINDOW);
+    char buf[START_SIZE_ARRAY] = {};
 
-    if (argc == 3) {
-        fileLoadTree->fileName = argv[1];
-        fileLoadTree->file = fopen(argv[1], "r");
-        
-        fileUploadTree->fileName = argv[2];
-        fileUploadTree->file = fopen(argv[2], "w");
-    } 
+    scanf("%c", &(buf[0]));
 
-    if (fileUploadTree->file == NULL || fileLoadTree->file == NULL) {
-    // FIXME - fclose 
-        fprintf(stderr, "FILE NO OPEN\n");
-        
-        fileLoadTree->fileName = NULL;
+    switch (buf[0]) {
+        case '1':
+        {
+            Akinator(tree->root);
+            break;
+        }
+        case '2':
+        {
+            //TODO
+            break;
+        }
+        case '3':
+        {
+            printf("Введите название файла:\n\n");
+            scanf("%31s", buf);
+            FILE* uploadFile = fopen(buf, "w");
+            if (uploadFile == NULL) {
+                fprintf(stderr, "Файл для сохранения дерева не открылся\n");
+                return -1;
+            }
 
-        fileUploadTree->fileName = NULL;
-
-        return -1;
+            UploadTree(tree, uploadFile);
+            fclose(uploadFile);
+            break;
+        }
+        case '4':
+        {
+            return 0;
+            break;
+        }
+        default:
+        {
+            DEBUG_LOG("На вход было подано %c\n", buf[0]);
+            break;
+        }
     }
+
+    Game(tree);
 
     return 0;
 }

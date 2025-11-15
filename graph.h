@@ -7,6 +7,8 @@
 
 static const unsigned SIZE_STR_COMPILE_COMMAND = 128;
 // FIXME - const
-int GraphCreate(const Tree* const tree, char* dotName);
+int GraphCreate(const Tree* const tree, const char* dotName, int graphNumber);
+
+TreeError TreeDump(Tree* tree);
 
 #endif // GRAPH_H_

@@ -3,33 +3,26 @@
 #include <string.h>
 
 #include "tree.h"
-
-const char* const defaultFile = "test.txt";
+#include "graph.h"
 
 int main(int argc, const char* argv[]) {
-    OpenDumpFile();
         
-    FileParam fileLoadTree = {}, fileUploadTree = {};
-    if (CreateFileParam(argc, argv, &fileLoadTree, &fileUploadTree) == -1) {
+    FileParam fileLoadTree = {};
+    if (CreateFileParam(argc, argv, &fileLoadTree) == -1) {
         return 0;
     }
     
-    Tree* tree = {};
-    LoadTree(&tree, &fileLoadTree);
+    Tree tree = {};
+    LoadTree(&tree, &fileLoadTree, "dumpFile.html");
 
-    // for (int i = 0; i < 10; i++) 
-    {
-        Akinator(tree);
-    }
-    TreeDump(tree);
-    UploadTree(tree, fileUploadTree.file);
+    Game(&tree);
+
+    TreeDump(&tree);
     // free(tree);
-    TreeDestroy(&tree);
     
-    fclose(fileLoadTree.file);
-    fclose(fileUploadTree.file);
+    TreeDestroy(&tree);
 
-    CloseDumpFile();
+    fclose(fileLoadTree.file);
 
     return 0;
 }
