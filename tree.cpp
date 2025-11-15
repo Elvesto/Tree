@@ -36,14 +36,15 @@ static const char* NO_VARIANTS[] = {
 
 static const char* HELLO_WINDOW = \
 "###############################\n"
-"#          CHOOSE MODS         #\n"
+"#          CHOOSE MODS        #\n"
 "#                             #\n"
 "# [1] - Akinator              #\n"
 "# [2] - Opredelenie           #\n"
 "# [3] - save tree             #\n"
 "# [4] - exit                  #\n"
-"# [5] - cmp (in develop       #\n"
-"# [6] i'm gay                 #\n"
+"# [5] - cmp (in develop)      #\n"
+"# [6] - i'm gay               #\n"
+"#                             #\n"
 "###############################\n";
 
 static TreeError PrintNode(Node* node, FILE* stream);
@@ -51,6 +52,8 @@ static int checkInArray(const char* value, const char* arr[], int size);
 static FileParam OpenDumpFile(const char* dumpFileName);
 static TreeError CloseDumpFile(FileParam dump);
 static TreeError AddAkinatorBase(Node* node);
+static int Definition(Node* node);
+static Node* Search(Node* node, const char* target);
 
 TreeError TreeInit(Tree* tree, DataType value, const char* dumpFileName) {
     assert(tree);
@@ -66,6 +69,7 @@ TreeError TreeInit(Tree* tree, DataType value, const char* dumpFileName) {
     tree->root->data = value;
     tree->root->left = NULL;
     tree->root->right = NULL; 
+    tree->root->parent = NULL;
 
     return OK;
 }
@@ -172,9 +176,9 @@ TreeError NodesDestroy(Node* node) {
         node->right = NULL;
     }
 
+    node->parent = NULL;
     FREE(node->data);
     FREE(node);
-    node = NULL;
 
     countDestroy++;
     // printf("%d\n", countDestroy);
@@ -192,6 +196,7 @@ Node* NewNode(DataType value) {
     node->data = value;
     node->left = NULL;
     node->right = NULL;
+    node->parent = NULL;
 
     return node;
 }
@@ -205,8 +210,8 @@ TreeError Akinator(Node* tree) {
 
     scanf("%31s", buf);
 
-    while (!checkInArray(buf, YES_VARIANTS, sizeof(YES_VARIANTS) / sizeof(YES_VARIANTS[0])) && \
-    !checkInArray(buf, NO_VARIANTS, sizeof(NO_VARIANTS) / sizeof(NO_VARIANTS[0]))) {
+    while (!(checkInArray(buf, YES_VARIANTS, sizeof(YES_VARIANTS) / sizeof(YES_VARIANTS[0])) || \
+    checkInArray(buf, NO_VARIANTS, sizeof(NO_VARIANTS) / sizeof(NO_VARIANTS[0])))) {
 
         printf("Неверный ввод\n");
         scanf("%31s", buf);
@@ -224,6 +229,7 @@ TreeError Akinator(Node* tree) {
             Akinator(tree->right);
         } else {
             AddAkinatorBase(tree);
+            printf("Буду знать!\n");
         }
     }
 
@@ -263,6 +269,11 @@ static TreeError AddAkinatorBase(Node* node) {
 
     node->left = temp;
     node->right = NewNode(tempStr);
+    if (node->right == NULL) {
+        return NOT_OK;
+    }
+    node->right->parent = node;
+    temp->parent = node;
 
     return OK;
 }
@@ -300,7 +311,9 @@ static Node* ReadNode(char** ppos) {
         }
 
         node->left = ReadNode(&pos);
+        if (node->left != NULL) { node->left->parent = node; }
         node->right = ReadNode(&pos);
+        if (node->right != NULL) { node->right->parent = node; }
 
         pos++;
         *ppos = pos;
@@ -324,7 +337,7 @@ TreeError LoadTree(Tree* tree, FileParam* fileInfo, const char* dumpFileName) {
     tree->dumpFile = OpenDumpFile(dumpFileName);
 
     char* buffer = bufCreate(fileInfo);
-    printf("%s\n", buffer);
+    // printf("%s\n", buffer);
     char* temp = buffer;
 
     tree->root = ReadNode(&temp);
@@ -350,13 +363,24 @@ int Game(Tree* tree) {
         }
         case '2':
         {
-            //TODO
+            printf("Введите название ноды:\n\n");
+            scanf(" %31[^\n]%*c", buf);
+
+            Node* target = Search(tree->root, buf);
+            if (target == NULL) {
+                printf("Такой ноды, к сожалению не найдено\n");
+                break;
+            }
+
+            Definition(target->parent);
+
             break;
         }
         case '3':
         {
             printf("Введите название файла:\n\n");
             scanf("%31s", buf);
+
             FILE* uploadFile = fopen(buf, "w");
             if (uploadFile == NULL) {
                 fprintf(stderr, "Файл для сохранения дерева не открылся\n");
@@ -365,21 +389,66 @@ int Game(Tree* tree) {
 
             UploadTree(tree, uploadFile);
             fclose(uploadFile);
+
             break;
         }
         case '4':
         {
             return 0;
+
+            break;
+        }
+        case '6':
+        {
+            printf("Услышал тебя, родной\n");
             break;
         }
         default:
         {
             DEBUG_LOG("На вход было подано %c\n", buf[0]);
+
             break;
         }
     }
 
+    printf("\n\n");
+
     Game(tree);
 
     return 0;
+}
+
+int Definition(Node* node) {
+    assert(node);
+
+    if (node->parent != NULL) {
+        Definition(node->parent);
+        if (node->parent->right == node) {
+            printf("не ");
+        }
+    }
+    printf("%s ", node->data);
+
+    return 0;
+}
+
+Node* Search(Node* node, const char* target) {
+    assert(node);
+    assert(node->data);
+
+    Node* temp = {};
+    
+    if (strcmp(target, node->data) == 0) {
+        return node;
+    }
+    if (node->left) {
+        temp = Search(node->left, target);
+        if (temp != NULL) { return temp; }
+    }
+    if (node->right) {
+        temp = Search(node->right, target);
+        if (temp != NULL) { return temp; }
+    }
+
+    return NULL;
 }

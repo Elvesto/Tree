@@ -24,6 +24,7 @@ enum TreeError {
 };
 
 struct Node {
+    Node* parent;
     DataType data;
     Node* left;
     Node* right;
