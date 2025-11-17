@@ -48,7 +48,7 @@ TreeError TreeDump(Tree* tree) {
 
     fprintf(tree->dumpFile.file, "<pre>\n");
 
-    fprintf(tree->dumpFile.file, "<h3> THREE LIST №%d </h3>\n", counter);
+    fprintf(tree->dumpFile.file, "<h3> THREE DUMP №%d </h3>\n", counter);
 
     fprintf(tree->dumpFile.file, "THREE [%p]\n", tree);
 

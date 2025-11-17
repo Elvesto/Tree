@@ -4,6 +4,7 @@
 
 #include "tree.h"
 #include "graph.h"
+#include "game.h"
 
 int main(int argc, const char* argv[]) {
         
@@ -14,6 +15,7 @@ int main(int argc, const char* argv[]) {
     
     Tree tree = {};
     LoadTree(&tree, &fileLoadTree, "dumpFile.html");
+    // TreeInit(&tree, strdup("neizvestno chto"), "dumpFile.html");
 
     Game(&tree);
 

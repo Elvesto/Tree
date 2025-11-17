@@ -48,10 +48,10 @@ TreeError NodesDestroy(Node* node);
 
 Node* NewNode(DataType value);
 
-TreeError Akinator(Node* tree);
-
 TreeError LoadTree(Tree* tree, FileParam* fileInfo, const char* dumpFileName);
 
-int Game(Tree* tree);
+int Definition(Node* node);
+
+Node* Search(Node* node, const char* target);
 
 #endif // THREE_H_

@@ -1,0 +1,37 @@
+digraph gh {
+graph [rankdir=TB];
+	node1 [label="Rt\n left = 0x503000000070\n right = 0x503000000280"];
+	node1 -> node2 [color=red];
+	node2 [label="Mentor\n left = 0x5030000000a0\n right = 0x503000000130"];
+	node2 -> node3 [color=red];
+	node3 [label="Vtokus\n left = 0x5030000000d0\n right = 0x503000000100"];
+	node3 -> node4 [color=red];
+	node4 [label="Denis\n left = (nil)\n right = (nil)"];
+	node3 -> node5 [color=red];
+	node5 [label="Vova\n left = (nil)\n right = (nil)"];
+	node2 -> node6 [color=red];
+	node6 [label="Jenshina\n left = 0x503000000160\n right = 0x503000000190"];
+	node6 -> node7 [color=red];
+	node7 [label="Marina\n left = (nil)\n right = (nil)"];
+	node6 -> node8 [color=red];
+	node8 [label="Makovod\n left = 0x5030000001c0\n right = 0x5030000001f0"];
+	node8 -> node9 [color=red];
+	node9 [label="Nazar\n left = (nil)\n right = (nil)"];
+	node8 -> node10 [color=red];
+	node10 [label="Vollibalist\n left = 0x503000000220\n right = 0x503000000250"];
+	node10 -> node11 [color=red];
+	node11 [label="Kola\n left = (nil)\n right = (nil)"];
+	node10 -> node12 [color=red];
+	node12 [label="Anton\n left = (nil)\n right = (nil)"];
+	node1 -> node13 [color=red];
+	node13 [label="Fpmi\n left = 0x5030000002b0\n right = 0x503000000340"];
+	node13 -> node14 [color=red];
+	node14 [label="Krasauchik\n left = 0x5030000002e0\n right = 0x503000000310"];
+	node14 -> node15 [color=red];
+	node15 [label="Amir\n left = (nil)\n right = (nil)"];
+	node14 -> node16 [color=red];
+	node16 [label="Sereja\n left = (nil)\n right = (nil)"];
+	node13 -> node17 [color=red];
+	node17 [label="neizvestno chto\n left = (nil)\n right = (nil)"];
+
+}

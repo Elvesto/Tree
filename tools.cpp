@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
 
 uint64_t sizeFile(FILE* file) {
     assert(file);
@@ -55,5 +56,14 @@ int CreateFileParam(const int argc, const char* const argv[],
         return -1;
     }
 
+    return 0;
+}
+
+int checkInArray(const char* value, const char* arr[], int size) {
+    for (int i = 0; i < size; i++) {
+        if (strcmp(value, arr[i]) == 0) {
+            return 1;
+        }
+    }
     return 0;
 }

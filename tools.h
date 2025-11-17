@@ -19,6 +19,8 @@
     #define DEBUG_LOG(format, ...) 
 #endif // PRINT_DEBUG
 
+#define LIMIT_STR "%31"
+
 struct FileParam {
     FILE* file;
     const char* fileName;
@@ -30,5 +32,7 @@ char* bufCreate(FileParam* fileInfo);
 
 int CreateFileParam(const int argc, const char* const argv[], 
     FileParam* fileLoadTree);
+
+int checkInArray(const char* value, const char* arr[], int size);
 
 #endif // TOOLS_H_
